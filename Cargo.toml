@@ -12,4 +12,5 @@ clap = { version = "4.5.4", features = ["derive"] }
 enum_dispatch = "0.3.13"
 humantime = "2.1.0"
 jsonwebtoken = {version = "9.3.0", features = ["use_pem"]}
+serde = "1.0.198"
 tokio = { version = "1", features = ["full"] } # 异步处理库
