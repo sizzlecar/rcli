@@ -55,11 +55,7 @@ pub async fn decode_verify<T: DeserializeOwned>(
 }
 
 async fn get_content(str_opt: Option<String>) -> Result<Vec<u8>, anyhow::Error> {
-    if str_opt.is_none() {
-        return Err(anyhow::Error::msg("no content"));
-    }
-
-    let str = str_opt.unwrap();
+    let str: String = str_opt.ok_or_else(|| anyhow::Error::msg("no content"))?;
     if str.starts_with('@') {
         let file_path = str.trim_start_matches('@');
         Ok(tokio::fs::read(file_path).await?)
