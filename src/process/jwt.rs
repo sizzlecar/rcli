@@ -63,3 +63,52 @@ async fn get_content(str_opt: Option<String>) -> Result<Vec<u8>, anyhow::Error> 
         Ok(str.into_bytes())
     }
 }
+
+//create unit tests
+#[cfg(test)]
+mod tests {
+
+    use std::collections::HashMap;
+
+    use super::*;
+
+    #[tokio::test]
+    async fn test_encode_decode() {
+        // Test data
+        let alg = "HS256";
+        let mut claims = HashMap::<String, String>::new();
+        claims.insert("sub".to_string(), "test claims".to_string());
+        let secret = Some("secret".to_string());
+        let private_key = None;
+
+        // Encode
+        let encoded_token = encode(alg, &claims, secret.clone(), private_key.clone()).await;
+        assert!(encoded_token.is_ok());
+
+        // Decode and verify
+        let decoded_token: Result<TokenData<HashMap<String, String>>, anyhow::Error> =
+            decode_verify(&encoded_token.unwrap(), secret, private_key).await;
+        assert!(decoded_token.is_ok());
+
+        // Check if the decoded claims match the original claims
+        let token_data = decoded_token.unwrap();
+        assert_eq!(token_data.claims.get("sub").unwrap(), "test claims");
+    }
+
+    #[tokio::test]
+    async fn test_get_content() {
+        // Test data
+        let str_opt = Some("test content".to_string());
+
+        // Get content from string
+        let content = get_content(str_opt).await;
+        assert!(content.is_ok());
+        assert_eq!(content.unwrap(), b"test content");
+
+        // Get content from file
+        let str_opt = Some("@./README.md".to_string());
+        let content = get_content(str_opt).await;
+        assert!(content.is_ok());
+        // Assert the content is read from the file correctly
+    }
+}
